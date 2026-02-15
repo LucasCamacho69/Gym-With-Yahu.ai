@@ -15,14 +15,9 @@ export class AuthController {
 			const authenticateService = new AuthenticateService();
 			const user = await authenticateService.execute({ email, password });
 
-			const token = await reply.jwtSign({
-				sign: {
-					sub: user.id,
-					expiresIn: "7d",
-				},
-			});
+			const token = await reply.jwtSign({}, { sign: { sub: user.id } });
 
-			return reply.status(200).send({ user, token });
+			return reply.status(200).send({ token });
 		} catch (err) {
 			return reply.status(401).send({ message: "Invalid credentials" });
 		}

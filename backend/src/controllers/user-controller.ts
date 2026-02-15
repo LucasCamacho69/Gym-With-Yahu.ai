@@ -15,6 +15,22 @@ export class UserController {
 		const createUserService = new CreateUserService();
 		const user = await createUserService.execute({ name, email, password });
 
-		return reply.status(201).send(user);
+		const token = await reply.jwtSign(
+			{},
+			{
+				sign: {
+					sub: user.id,
+				},
+			},
+		);
+
+		return reply.status(201).send({
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+			},
+			token,
+		});
 	}
 }

@@ -3,59 +3,80 @@ import { prisma } from "../lib/prisma";
 
 export class GenerateWorkoutService {
 	async execute(userId: string, userMessage: string) {
-		const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-		const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+		const apiKey = process.env.GEMINI_API_KEY;
+		if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
 
-		// 1. Pegamos os exercícios que temos no banco
+		const genAI = new GoogleGenerativeAI(apiKey);
+
+		const model = genAI.getGenerativeModel({
+			model: "gemini-2.5-flash",
+		});
+
 		const availableExercises = await prisma.exercise.findMany({
 			select: { name: true, muscleGroup: true },
 		});
 
-		const exercisesList = availableExercises
-			.map((e) => `${e.name} (${e.muscleGroup})`)
-			.join(", ");
+		// MUDANÇA 1: Formatamos a lista de forma mais clara para a IA
+		const exercisesList =
+			availableExercises.length > 0
+				? availableExercises
+						.map((e) => `- EXERCÍCIO: "${e.name}" | GRUPO: ${e.muscleGroup}`)
+						.join("\n")
+				: "- EXERCÍCIO: Flexão de Braço | GRUPO: Peito";
 
-		// 2. Criamos o Prompt
 		const prompt = `
-      Você é um personal trainer de IA Chamado Yahu. 
-      O usuário quer um treino baseado no seguinte pedido: "${userMessage}".
+      Você é o Yahu, um Personal Trainer de IA focado em hipertrofia.
+      O usuário quer: "${userMessage}".
       
-      Lista de exercícios disponíveis no meu banco de dados: [${exercisesList}].
+      LISTA DE EXERCÍCIOS DISPONÍVEIS (USE APENAS ESTES):
+      ${exercisesList}
       
-      INSTRUÇÕES IMPORTANTES:
-      - Use APENAS os exercícios da lista acima.
-      - Retorne APENAS um objeto JSON puro, sem comentários ou blocos de código markdown.
-      - Formato do JSON esperado:
+      INSTRUÇÕES CRÍTICAS:
+      1. No campo "name" do JSON, use o NOME EXATO que está entre aspas na lista acima. 
+      2. Não adicione o grupo muscular ou qualquer texto extra ao nome.
+      3. Se o usuário pedir algo que não está na lista, use o exercício mais próximo da lista.
+
+      Retorne APENAS um objeto JSON puro:
       {
-        "workoutName": "Nome do Treino",
+        "workoutName": "Nome Criativo do Treino",
         "exercises": [
-          { "name": "Nome do Exercício", "sets": 3, "reps": "12", "rest": 60 }
+          { "name": "Nome Exato", "sets": 3, "reps": "10-12", "rest": 60 }
         ]
       }
     `;
 
-		const result = await model.generateContent(prompt);
-		const responseText = result.response.text();
+		try {
+			const result = await model.generateContent(prompt);
+			const response = await result.response;
+			const responseText = response.text();
 
-		const workoutData = JSON.parse(responseText);
+			// MUDANÇA 2: Limpeza mais robusta do Markdown
+			const cleanResponse = responseText.replace(/```json|```/g, "").trim();
+			const workoutData = JSON.parse(cleanResponse);
 
-		const workout = await prisma.workout.create({
-			data: {
-				userId,
-				name: workoutData.workoutName,
-				isAiGenerated: true,
-				exercises: {
-					create: workoutData.exercises.map((ex: any) => ({
-						exercise: { connect: { name: ex.name } },
-						sets: ex.sets,
-						reps: ex.reps.toString(),
-						restTime: ex.rest,
-					})),
+			const workout = await prisma.workout.create({
+				data: {
+					userId,
+					name: workoutData.workoutName,
+					isAiGenerated: true,
+					exercises: {
+						create: workoutData.exercises.map((ex: any) => ({
+							exercise: {
+								connect: { name: ex.name.trim() }, // trim() para evitar espaços bobos
+							},
+							sets: Number(ex.sets),
+							reps: String(ex.reps),
+							restTime: Number(ex.rest),
+						})),
+					},
 				},
-			},
-			include: { exercises: { include: { exercise: true } } },
-		});
+				include: { exercises: { include: { exercise: true } } },
+			});
 
-		return workout;
+			return workout;
+		} catch (error: any) {
+			console.error("❌ ERRO NO SERVICE:", error);
+			throw new Error(`Falha na geração: ${error.message}`);
+		}
 	}
 }

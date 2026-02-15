@@ -7,10 +7,10 @@ const userController = new UserController();
 const authController = new AuthController();
 
 export async function userRoutes(app: FastifyInstance) {
-	app.post("/users", userController.create);
-	app.post("/sessions", authController.handle);
+	app.post("/users", userController.create); 		// CREATE USER
+	app.post("/sessions", authController.handle); // LOGIN USER
 
-	app.get("/me", { onRequest: [verifyJWT] }, async (request) => {
-		return { userId: request.user.sub };
+	app.get("/me", { onRequest: [verifyJWT] }, async (request) => {   // GET USE INFO
+		return { userId: request.user.sub };  
 	});
 }

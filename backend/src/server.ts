@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import { userRoutes } from "./routes/user-route";
 import cors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
+import { workoutRoutes } from "./routes/workout-routes";
 
 const app = Fastify({
 	logger: true,
@@ -11,12 +12,12 @@ const app = Fastify({
 app.register(fastifyJwt, {
 	secret: process.env.JWT_SECRET || "123",
 });
+app.register(cors, {
+	origin: true, //TODO: MUDAR PARA DOMINIO DO APP
+});
 
 app.register(userRoutes);
-
-app.register(cors, {
-	origin: true, // Em produção, mude para o domínio do seu app
-});
+app.register(workoutRoutes);
 
 app.setErrorHandler((error, _, reply) => {
 	if (error instanceof Error) {
