@@ -8,83 +8,158 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-
+  console.log('Iniciando limpeza do banco...');
   await prisma.workoutExercise.deleteMany();
   await prisma.exercise.deleteMany();
 
-  // prisma/seed.ts - Adicione estes ao array 'exercises'
-// prisma/seed.ts - Adicione estes ao array 'exercises'
-const exercises = [
-  // PEITO
-  { name: 'Supino Reto Barra', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=sqOhadTM99U' },
-  { name: 'Supino Inclinado com Halteres', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=8iP9S8NPr_U' },
-  { name: 'Crucifixo Máquina (Peck Deck)', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=W78v_v_u7iI' },
-  { name: 'Cross Over Polia Alta', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=H75_9E_r4Hk' },
-  { name: 'Supino Declinado Barra', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=LfyQ_S_T7y0' },
-  { name: 'Flexão de Braços', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=v9LABVJzv8Y' },
-  { name: 'Pull Over com Halter', muscleGroup: 'Peito', videoUrl: 'https://www.youtube.com/watch?v=5V_97mX_27o' },
+  console.log('Criando exercícios do Leandro Twin...');
 
-  // COSTAS
-  { name: 'Puxada Pulley Frente', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=ER6fI-S8T-s' },
-  { name: 'Remada Curvada com Barra', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=S3U_9p56S7E' },
-  { name: 'Remada Baixa com Triângulo', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=IkoGfGOf-X8' },
-  { name: 'Barra Fixa (Pull-up)', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=eGo4IYlbE5g' },
-  { name: 'Remada Unilateral (Serrote)', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=skI6vOnoC94' },
-  { name: 'Pulldown na Polia Alta', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=6m89-p6Vj2E' },
-  { name: 'Levantamento Terra', muscleGroup: 'Costas', videoUrl: 'https://www.youtube.com/watch?v=X07P8v_qYfM' },
+  const exercises = [
+    // --- PEITORAL (Mapeado para "Peito") ---
+    { name: 'Supino Reto Barra', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/EZMYCLKuGow' },
+    { name: 'Supino Reto Halteres', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/EZMYCLKuGow' },
+    { name: 'Supino Reto Smith', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/EZMYCLKuGow' },
+    { name: 'Supino Inclinado Barra', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/WP1VLAt8hbM' },
+    { name: 'Supino Inclinado Halteres', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/WP1VLAt8hbM' },
+    { name: 'Supino Inclinado Smith', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/WP1VLAt8hbM' },
+    { name: 'Supino Declinado Barra', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/J2g6qPBJfqo' },
+    { name: 'Supino Declinado Halteres', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/J2g6qPBJfqo' },
+    { name: 'Crucifixo Reto Halteres', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/uDMmccuPVPQ' },
+    { name: 'Crucifixo Reto Cross', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/uDMmccuPVPO' },
+    { name: 'Crucifixo Inclinado Halteres', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/uy9Xk3SVrms' },
+    { name: 'Crucifixo Inclinado Cross', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/uy9Xk3SVrms' },
+    { name: 'Crucifixo Declinado Halteres', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/zdkX5Gcdq8' },
+    { name: 'Crucifixo Declinado Cross', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/zdkX5Gcdq8' },
+    { name: 'Cross-Over Polia Alta', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/jqTlJt3IXzO' },
+    { name: 'Cross-Over Polia Média', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/jqTlJt3JXzO' },
+    { name: 'Flexão De Braço', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/dHgoYiCraCw' },
+    { name: 'Peck Deck (Voador)', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/FzCnfD0gOXo' },
+    { name: 'Pull-Over', muscleGroup: 'Peito', videoUrl: 'https://youtu.be/-KaMXMMIVrU' },
 
-  // PERNAS (QUADRÍCEPS E POSTERIOR)
-  { name: 'Agachamento Livre Barra', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=R2dMsNkZidM' },
-  { name: 'Leg Press 45', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=yZpx_V9iy_o' },
-  { name: 'Cadeira Extensora', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=7uV_V07p7-E' },
-  { name: 'Mesa Flexora', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=fXfS6vOn_2Q' },
-  { name: 'Cadeira Flexora', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=GAn_1S_Uo7g' },
-  { name: 'Stiff com Barra', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=h6id769X6tI' },
-  { name: 'Afundo com Halteres', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=6pYV5D9T7_w' },
-  { name: 'Cadeira Abdutora', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=pAnIas8W_b4' },
-  { name: 'Cadeira Adutora', muscleGroup: 'Pernas', videoUrl: 'https://www.youtube.com/watch?v=hO-e_NqN8vQ' },
+    // --- DORSAIS (Mapeado para "Costas") ---
+    { name: 'Barra Fixa Pegada Pronada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/thg6cGXSIvY' },
+    { name: 'Barra Fixa Pegada Supinada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/thg6cGXSIVY' },
+    { name: 'Barra Fixa Com Triângulo', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/thg6cGXSlvY' },
+    { name: 'Levantamento Terra', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/50AkPBZWACO' },
+    { name: 'Puxada Vertical Pegada Pronada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/pIMrHhluK8' },
+    { name: 'Puxada Vertical Pegada Supinada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/pJMrHhluK8' },
+    { name: 'Puxada Vertical Com Triângulo', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/pIMrHhluK8' },
+    { name: 'Remada Curvada Barra Pronada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/TfxlMertfsw' },
+    { name: 'Remada Curvada Barra Supinada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/TfxlMertfsw' },
+    { name: 'Remada Curvada Cavalinho', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/TfxlMertfsw' },
+    { name: 'Remada Curvada Halteres Pronada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/Vk6c7CjtM14' },
+    { name: 'Remada Curvada Halteres Supinada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/Vk6c7CitM14' },
+    { name: 'Remada Curvada Halteres Neutra', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/Vk6c7CjtM14' },
+    { name: 'Remada Máquina Pronada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/OvvlEdEHzHc' },
+    { name: 'Remada Máquina Supinada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/OvvIEdEHzHc' },
+    { name: 'Remada Máquina Neutra', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/QyvlEdEHzHc' },
+    { name: 'Remada Cross Pronada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/HpWWrevaBNO' },
+    { name: 'Remada Cross Supinada', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/HpWWrevaBNO' },
+    { name: 'Remada Cross Neutra', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/HpWWreyaBNO' },
+    { name: 'Remada Unilateral Halter (Serrote)', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/m4h4jT9patY' },
+    { name: 'Pull-Down Barra', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/v6-QIOY0nW0' },
+    { name: 'Pull-Down Corda', muscleGroup: 'Costas', videoUrl: 'https://youtu.be/v6-QIOY0nW0' },
 
-  // OMBROS
-  { name: 'Desenvolvimento com Halteres', muscleGroup: 'Ombros', videoUrl: 'https://www.youtube.com/watch?v=M2rwvNhSct0' },
-  { name: 'Elevação Lateral Halteres', muscleGroup: 'Ombros', videoUrl: 'https://www.youtube.com/watch?v=2v-re6mS_vA' },
-  { name: 'Elevação Frontal com Barra', muscleGroup: 'Ombros', videoUrl: 'https://www.youtube.com/watch?v=Ounm3G_YmSw' },
-  { name: 'Crucifixo Inverso Halteres', muscleGroup: 'Ombros', videoUrl: 'https://www.youtube.com/watch?v=wXWp_O6Iid0' },
-  { name: 'Remada Alta na Polia', muscleGroup: 'Ombros', videoUrl: 'https://www.youtube.com/watch?v=yW_I_8L4M5k' },
-  { name: 'Encolhimento com Halteres', muscleGroup: 'Ombros', videoUrl: 'https://www.youtube.com/watch?v=rXInXo0G8hU' },
+    // --- DELTÓIDES (Mapeado para "Ombros") ---
+    { name: 'Elevação Lateral Halteres', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/IwWvZ0rINXs' },
+    { name: 'Elevação Lateral Sentado', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/IwWvZ0rINXs' },
+    { name: 'Elevação Lateral Unilateral Banco', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/IwWvZ0r1NXs' },
+    { name: 'Elevação Lateral Cross', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/sKPIdvVvHul' },
+    { name: 'Elevação Frontal Barra', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/ZQhDiONDZA' },
+    { name: 'Elevação Frontal Anilha', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/ZQhDiONpZA' },
+    { name: 'Elevação Frontal Halteres', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/NxSuojHZa8k' },
+    { name: 'Elevação Frontal Cruzada', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/NxSuojHZa8k' },
+    { name: 'Elevação Frontal Cross', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/S7B5LwWrLAO' },
+    { name: 'Crucifixo Inverso Halteres', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/5HDkxzxe400' },
+    { name: 'Crucifixo Inverso Cross', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/5HDkxzxe400' },
+    { name: 'Desenvolvimento Militar', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/EuOAfhXBEvs' },
+    { name: 'Desenvolvimento Halteres', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/EuQAfhXBEvs' },
+    { name: 'Desenvolvimento Máquina', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/EuQAfhXBEvs' },
+    { name: 'Manguito Rotador Externo', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/AevNFIX7IV4' },
+    { name: 'Manguito Rotador Interno', muscleGroup: 'Ombros', videoUrl: 'https://youtu.be/vN9BwyZGA' },
 
-  // BRAÇOS (BÍCEPS E TRÍCEPS)
-  { name: 'Rosca Direta Barra W', muscleGroup: 'Bíceps', videoUrl: 'https://www.youtube.com/watch?v=X-iV6uO9ZPM' },
-  { name: 'Rosca Alternada com Halteres', muscleGroup: 'Bíceps', videoUrl: 'https://www.youtube.com/watch?v=mGbe9H-v1zY' },
-  { name: 'Rosca Martelo Halteres', muscleGroup: 'Bíceps', videoUrl: 'https://www.youtube.com/watch?v=7_W_Y6O6e08' },
-  { name: 'Rosca Scott Máquina', muscleGroup: 'Bíceps', videoUrl: 'https://www.youtube.com/watch?v=OAnX4lW0N7Y' },
-  { name: 'Tríceps Pulley Barra Reta', muscleGroup: 'Tríceps', videoUrl: 'https://www.youtube.com/watch?v=6FzKu_Yf8rQ' },
-  { name: 'Tríceps Corda', muscleGroup: 'Tríceps', videoUrl: 'https://www.youtube.com/watch?v=vB5v8n6Vl4w' },
-  { name: 'Tríceps Testa com Barra W', muscleGroup: 'Tríceps', videoUrl: 'https://www.youtube.com/watch?v=3m_O_0_8oXQ' },
-  { name: 'Tríceps Coice na Polia', muscleGroup: 'Tríceps', videoUrl: 'https://www.youtube.com/watch?v=q6e0q0u7z8Y' },
-  { name: 'Mergulho em Paralelas', muscleGroup: 'Tríceps', videoUrl: 'https://www.youtube.com/watch?v=2z8JmcrW-As' },
+    // --- TRAPÉZIO ---
+    { name: 'Encolhimento Barra', muscleGroup: 'Trapézio', videoUrl: 'https://youtu.be/RhGjwlUe16E' },
+    { name: 'Encolhimento Halteres', muscleGroup: 'Trapézio', videoUrl: 'https://youtu.be/RhGjwlUe16E' },
+    { name: 'Encolhimento Smith', muscleGroup: 'Trapézio', videoUrl: 'https://youtu.be/RhGjwlUe16E' },
+    { name: 'Remada Alta Barra', muscleGroup: 'Trapézio', videoUrl: 'https://youtu.be/tm0lywBhIYM' },
+    { name: 'Remada Alta Cross', muscleGroup: 'Trapézio', videoUrl: 'https://youtu.be/tm0lywBhIYM' },
 
-  // GLÚTEOS E PANTURRILHA
-  { name: 'Elevação Pélvica Barra', muscleGroup: 'Glúteos', videoUrl: 'https://www.youtube.com/watch?v=9L7N_4G8_p0' },
-  { name: 'Glúteo Cabo (Coice)', muscleGroup: 'Glúteos', videoUrl: 'https://www.youtube.com/watch?v=8V_7_YI9eXw' },
-  { name: 'Panturrilha em Pé Máquina', muscleGroup: 'Panturrilha', videoUrl: 'https://www.youtube.com/watch?v=N66O6_T0o2E' },
-  { name: 'Panturrilha Sentado (Gêmeos)', muscleGroup: 'Panturrilha', videoUrl: 'https://www.youtube.com/watch?v=r0_v6v_v8YI' },
+    // --- TRÍCEPS ---
+    { name: 'Mergulho (Paralelas)', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/TCVj8cliLNo' },
+    { name: 'Supino Fechado', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/ZiemT4r4DcU' },
+    { name: 'Rosca Testa Barra', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/zznCYBVZOVA' },
+    { name: 'Rosca Testa Halteres', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/SbAykzCE-xk' },
+    { name: 'Tríceps Pulley Barra', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/dTqDKC0D6P4' },
+    { name: 'Tríceps Pulley Corda', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/dTqDKC0D6P4' },
+    { name: 'Tríceps Pulley Unilateral', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/nTTTjbAOTSU' },
+    { name: 'Rosca Francesa', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/YJ4kGE3eemY' },
+    { name: 'Tríceps Coice Halter', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/PyKv23F-FVM' },
+    { name: 'Tríceps Coice Cross', muscleGroup: 'Tríceps', videoUrl: 'https://youtu.be/PyKv23F-fVM' },
 
-  // ABDÔMEN
-  { name: 'Abdominal Supra (Solo)', muscleGroup: 'Abdômen', videoUrl: 'https://www.youtube.com/watch?v=Xyd_v_6_v8A' },
-  { name: 'Abdominal Infra (Elevação Pernas)', muscleGroup: 'Abdômen', videoUrl: 'https://www.youtube.com/watch?v=7N_X_v8Y_pE' },
-  { name: 'Prancha Isométrica', muscleGroup: 'Abdômen', videoUrl: 'https://www.youtube.com/watch?v=pYit9vY5v8A' },
-  { name: 'Abdominal Oblíquo no Solo', muscleGroup: 'Abdômen', videoUrl: 'https://www.youtube.com/watch?v=yW_I_8L4M5k' },
-];
+    // --- BÍCEPS ---
+    { name: 'Rosca Direta Barra', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/Q8TqfD8E7BU' },
+    { name: 'Rosca Direta Halteres', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/Q8TqfD8E7BU' },
+    { name: 'Rosca Direta Cross', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/Q8TqfD8E7BU' },
+    { name: 'Rosca Martelo Halteres', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/0qkQy8V2FC0' },
+    { name: 'Rosca Martelo Corda', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/0qkOv8V2FC0' },
+    { name: 'Rosca Alternada Halteres', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/S1HAcTVOVYE' },
+    { name: 'Rosca Scott Máquina', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/zpTK6eihdSA' },
+    { name: 'Rosca Scott Barra', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/zpTK6eihdSA' },
+    { name: 'Rosca Concentrada', muscleGroup: 'Bíceps', videoUrl: 'https://youtu.be/EEpvOQAAtRo' },
 
-  console.log('Seeding...');
+    // --- ANTEBRAÇO ---
+    { name: 'Flexão de Punho', muscleGroup: 'Antebraço', videoUrl: 'https://youtu.be/3PDPiCoWF-Y' },
+    { name: 'Extensão de Punho', muscleGroup: 'Antebraço', videoUrl: 'https://youtu.be/Kx8rg0MJXc' },
+    { name: 'Rosca Inversa Barra', muscleGroup: 'Antebraço', videoUrl: 'https://youtu.be/jbSr9CzIPmA' },
+    { name: 'Rosca Inversa Cross', muscleGroup: 'Antebraço', videoUrl: 'https://youtu.be/jbSr9CzJPmA' },
+
+    // --- COXAS (Mapeado para "Pernas") ---
+    { name: 'Agachamento Livre', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/zgk71dUUtOY' },
+    { name: 'Agachamento Smith', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/zgk71dUUtOY' },
+    { name: 'Agachamento Hack', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/zgk71dUUtOY' },
+    { name: 'Agachamento Frontal', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/syfDrU220FU' },
+    { name: 'Agachamento Sumo', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/06Cmxez6D0k' },
+    { name: 'Agachamento Búlgaro', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/IGf9fR4Y7Iw' },
+    { name: 'Passada (Avanço)', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/sQ5RjbpPirY' },
+    { name: 'Afundo', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/Umzor-g-to' },
+    { name: 'Leg Press 45', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/nY8UsiAqwds' },
+    { name: 'Stiff', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/u1E3u2gJYE' },
+    { name: 'Cadeira Extensora', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/el3oHbB5DM' },
+    { name: 'Mesa Flexora', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/2-ULaRrQa7c' },
+    { name: 'Cadeira Flexora', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/Zss6E3VU6X0' },
+    { name: 'Cadeira Adutora', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/Wf602gn9zU' },
+    { name: 'Cadeira Abdutora', muscleGroup: 'Pernas', videoUrl: 'https://youtu.be/e2gmqTG10gQ' },
+
+    // --- GLÚTEOS ---
+    { name: 'Glúteos Máquina', muscleGroup: 'Glúteos', videoUrl: 'https://youtu.be/JhodV0011vw' },
+    { name: 'Glúteos 4 Apoios', muscleGroup: 'Glúteos', videoUrl: 'https://youtu.be/e4RuZ1NVYqA' },
+    { name: 'Elevação Pélvica', muscleGroup: 'Glúteos', videoUrl: 'https://youtu.be/ptK0azwOXwM' },
+    { name: 'Glúteo Coice Cross', muscleGroup: 'Glúteos', videoUrl: 'https://youtu.be/JdHbXlggr6Q' },
+
+    // --- PANTURRILHAS ---
+    { name: 'Gêmeos Em Pé Máquina', muscleGroup: 'Panturrilha', videoUrl: 'https://youtu.be/824pMjvGXgc' },
+    { name: 'Gêmeos Sentado Máquina', muscleGroup: 'Panturrilha', videoUrl: 'https://youtu.be/jMWsp-W9gY' },
+    { name: 'Gêmeos Leg Press', muscleGroup: 'Panturrilha', videoUrl: 'https://youtu.be/wCXvfH-BLg' },
+
+    // --- ABDÔMEN ---
+    { name: 'Abdominal Supra', muscleGroup: 'Abdômen', videoUrl: 'https://youtu.be/7YxVRiATugo' },
+    { name: 'Abdominal Infra', muscleGroup: 'Abdômen', videoUrl: 'https://youtu.be/ixJcUH8AIL8' },
+    { name: 'Abdominal Oblíquo', muscleGroup: 'Abdômen', videoUrl: 'https://youtu.be/Smr8ipkN5A0' },
+    { name: 'Prancha Abdominal', muscleGroup: 'Abdômen', videoUrl: 'https://youtu.be/qNRqGqESAWU' },
+    { name: 'Vácuo Abdominal', muscleGroup: 'Abdômen', videoUrl: 'https://youtu.be/qvdiga5sQvQ' },
+  ];
 
   for (const exercise of exercises) {
     await prisma.exercise.create({
-      data: exercise,
+      data: {
+        ...exercise,
+        description: 'Execução técnica por Leandro Twin. CREF: 128544-G/SP',
+      },
     });
   }
 
-  console.log('Seed finished');
+  console.log(`Seed finalizado! ${exercises.length} exercícios criados.`);
 }
 
 main()
