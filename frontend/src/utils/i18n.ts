@@ -1,5 +1,6 @@
 export const translations = {
   pt: {
+
     welcome: "Bem-vindo,",
     athlete: "Atleta",
     login: "Entrar",
@@ -14,8 +15,19 @@ export const translations = {
     activityTitle: "Atividade Semanal",
     activitySubtitle: "Seu histórico de treinos nos últimos dias",
     workoutButtonSubtitle: "Toque para criar uma rotina personalizada",
+
+    profileTitle: "Perfil",
+    settings: "Configurações",
+    appearance: "Aparência",
+    darkMode: "Modo Escuro",
+    language: "Idioma",
+    selectLanguage: "Selecionar Idioma",
+    logout: "Sair da Conta",
+    version: "Versão",
+    account: "Conta",
   },
   en: {
+
     welcome: "Welcome,",
     athlete: "Athlete",
     login: "Login",
@@ -30,5 +42,15 @@ export const translations = {
     activityTitle: "Weekly Activity",
     activitySubtitle: "Your workout history over the last few days",
     workoutButtonSubtitle: "Tap to create a personalized routine",
+
+    profileTitle: "Profile",
+    settings: "Settings",
+    appearance: "Appearance",
+    darkMode: "Dark Mode",
+    language: "Language",
+    selectLanguage: "Select Language",
+    logout: "Logout",
+    version: "Version",
+    account: "Account",
   }
 };
