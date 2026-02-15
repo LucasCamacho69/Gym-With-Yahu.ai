@@ -1,20 +1,48 @@
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'nativewind';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { usePreferencesStore } from '../src/store/preferences-store';
 import { View } from 'react-native';
-import { styled } from 'nativewind';
+import Colors from '../constants/Colors';
+import "../global.css";
 
-const StyledView = styled(View);
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { colorScheme } = useColorScheme();
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
+
+  const { isDarkMode } = usePreferencesStore();
+  const theme = isDarkMode ? DarkTheme : DefaultTheme;
+  // Forçar a cor de fundo correta para evitar flashes brancos
+  const backgroundColor = isDarkMode ? Colors.dark.background : Colors.light.background;
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
-    <StyledView className="flex-1 bg-white dark:bg-slate-950" key={colorScheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="login" />
-        <Stack.Screen name="register" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-    </StyledView>
+    <ThemeProvider value={theme}>
+      <View style={{ flex: 1, backgroundColor }}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="login" />
+          <Stack.Screen name="register" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="workout/[id]" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      </View>
+    </ThemeProvider>
   );
 }
