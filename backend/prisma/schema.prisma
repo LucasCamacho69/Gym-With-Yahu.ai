@@ -10,12 +10,12 @@ model User {
   id            String         @id @default(uuid())
   name          String
   email         String         @unique
-  password_hash String // Senha já com Salt armazenada aqui
+  password_hash String 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   
-  goal          String? // Ex: Emagrecimento, Ganho de Massa
-  level         String? // Ex: Iniciante, Intermediário, Avançado
+  goal          String? //Emagrecimento, Ganho de Massa
+  level         String? //Iniciante, Intermediário, Avançado
 
   // Relacionamentos
   workouts      Workout[]
