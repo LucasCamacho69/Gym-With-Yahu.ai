@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 import { usePreferencesStore } from '../src/store/preferences-store';
 import { View } from 'react-native';
 import Colors from '../constants/Colors';
-import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,19 +16,15 @@ export default function RootLayout() {
   });
 
   const { isDarkMode } = usePreferencesStore();
+  // Aqui garantimos que o React Navigation recebe o tema correto
   const theme = isDarkMode ? DarkTheme : DefaultTheme;
-  // Forçar a cor de fundo correta para evitar flashes brancos
   const backgroundColor = isDarkMode ? Colors.dark.background : Colors.light.background;
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
+    if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+  if (!loaded) return null;
 
   return (
     <ThemeProvider value={theme}>
@@ -38,8 +33,8 @@ export default function RootLayout() {
           <Stack.Screen name="login" />
           <Stack.Screen name="register" />
           <Stack.Screen name="(tabs)" />
+          {/* A tela de detalhes fica aqui, fora das tabs */}
           <Stack.Screen name="workout/[id]" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style={isDarkMode ? 'light' : 'dark'} />
       </View>

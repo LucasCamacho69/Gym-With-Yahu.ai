@@ -1,123 +1,190 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, RefreshControl } from 'react-native';
-import { useAuthStore } from '@/src/store/auth-store';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { Send, Bot, Dumbbell, User } from 'lucide-react-native';
+import { api } from '@/src/services/api';
 import { usePreferencesStore } from '@/src/store/preferences-store';
-import { workoutService, Workout } from '@/src/services/workout-service';
 import Colors from '@/constants/Colors';
-import { Dumbbell, Calendar, TrendingUp, CheckCircle2 } from 'lucide-react-native';
 
-export default function HomeScreen() {
-  const { user } = useAuthStore();
+// Componente para a animação "Pensando..."
+const TypingIndicator = () => {
+  const [dots, setDots] = useState('');
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => prev.length < 3 ? prev + '.' : '');
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+  return (
+    <View className="flex-row items-center ml-2 mb-4">
+      <View className="bg-indigo-600 w-6 h-6 rounded-full items-center justify-center mr-2">
+        <Bot size={14} color="white" />
+      </View>
+      <Text className="text-zinc-500 text-sm italic">
+        Yahu está a pensar{dots}
+      </Text>
+    </View>
+  );
+};
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  workoutData?: any; 
+}
+
+export default function ChatScreen() {
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '1', role: 'assistant', content: 'Olá! Sou o Yahu. Qual o foco do treino de hoje?' }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  
   const { isDarkMode } = usePreferencesStore();
   const themeColors = isDarkMode ? Colors.dark : Colors.light;
-  
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
 
-  // Gera os últimos 7 dias (ex: ["2026-02-15", "2026-02-14", ...])
-  const getLast7Days = () => {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      days.push(d.toISOString().split('T')[0]); 
-    }
-    return days;
-  };
+  const MAX_CHARS = 120;
 
-  const fetchActivity = async () => {
+  async function handleSend() {
+    // Validações: Texto vazio, Carregando ou Excedeu limite
+    if (!input.trim() || loading || input.length > MAX_CHARS) return;
+
+    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    
+    const messageToSend = input;
+    setInput(''); // Limpa o input imediatamente
+    setLoading(true);
+
     try {
-      const data = await workoutService.getAll();
-      setWorkouts(data);
-    } catch (e) {
-      console.error(e);
+      // Rota correta conforme seu backend
+      const response = await api.post('/workouts/generate', { message: messageToSend });
+      const workout = response.data;
+
+      const botMessage: Message = { 
+        id: (Date.now() + 1).toString(), 
+        role: 'assistant', 
+        content: `Treino "${workout.name}" criado com sucesso! Toque abaixo para ver os detalhes.`,
+        workoutData: workout 
+      };
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [...prev, { 
+        id: 'err', 
+        role: 'assistant', 
+        content: 'Ops, tive um problema de conexão ao gerar o treino. Verifique se o servidor está rodando.' 
+      }]);
     } finally {
-      setRefreshing(false);
+      setLoading(false);
+      // Scroll para o final
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  };
-
-  useEffect(() => {
-    fetchActivity();
-  }, []);
-
-  // Verifica se existe algum treino nesta data (compara strings YYYY-MM-DD)
-  const hasWorkoutOnDate = (dateStr: string) => {
-    return workouts.some(w => w.createdAt.startsWith(dateStr));
-  };
-
-  const weekDays = getLast7Days();
+  }
 
   return (
-    <ScrollView 
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
       className="flex-1 bg-gray-50 dark:bg-zinc-950"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchActivity(); }} />}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      {/* Header */}
-      <View className="pt-16 pb-6 px-6 bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-800">
-        <Text className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Bem-vindo de volta,</Text>
-        <Text className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mt-1">
-          {user?.name || "Atleta"}
-        </Text>
-      </View>
-
-      {/* Calendário de Constância */}
-      <View className="m-6 p-5 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800">
-        <View className="flex-row justify-between items-center mb-4">
-          <View className="flex-row items-center">
-             <Calendar size={20} color={themeColors.tint} style={{marginRight: 8}}/>
-             <Text className="font-bold text-lg text-zinc-800 dark:text-zinc-100">Sua Constância</Text>
+      {/* Header Fixo */}
+      <View className="p-4 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pt-12 shadow-sm z-10">
+        <View className="flex-row items-center">
+          <View className="bg-indigo-600 p-2 rounded-full mr-3">
+            <Bot color="white" size={24} />
           </View>
-          <Text className="text-xs text-zinc-400 uppercase">Últimos 7 dias</Text>
-        </View>
-
-        <View className="flex-row justify-between mt-2">
-          {weekDays.map((day) => {
-            const isActive = hasWorkoutOnDate(day);
-            // Pega a letra do dia da semana (D, S, T, Q...)
-            const dayLabel = new Date(day).toLocaleDateString('pt-BR', { weekday: 'narrow' }).toUpperCase();
-            
-            return (
-              <View key={day} className="items-center">
-                 <View 
-                   className={`w-10 h-10 rounded-full items-center justify-center mb-2 border ${
-                     isActive 
-                      ? 'bg-emerald-500 border-emerald-500 shadow-sm' 
-                      : 'bg-transparent border-gray-200 dark:border-zinc-700'
-                   }`}
-                 >
-                   {isActive && <CheckCircle2 size={16} color="white" />}
-                 </View>
-                 <Text className={`text-xs ${isActive ? 'font-bold text-emerald-600' : 'text-zinc-400'}`}>
-                   {dayLabel}
-                 </Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <View className="mt-6 pt-4 border-t border-gray-100 dark:border-zinc-800">
-           <Text className="text-center text-zinc-500 text-sm">
-             Você treinou <Text className="font-bold text-emerald-600">{workouts.length}</Text> vezes no total.
-           </Text>
+          <View>
+            <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Yahu IA</Text>
+            <Text className="text-emerald-500 text-xs font-medium">Online</Text>
+          </View>
         </View>
       </View>
 
-      {/* Cards de Resumo */}
-      <View className="flex-row px-6 space-x-4 mb-10">
-        <View className="flex-1 bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800">
-           <TrendingUp size={24} color="#6366f1" style={{marginBottom: 8}} />
-           <Text className="text-zinc-500 dark:text-zinc-400 text-xs">Objetivo Atual</Text>
-           <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Hipertrofia</Text>
+      {/* Lista de Mensagens */}
+      <ScrollView 
+        ref={scrollViewRef}
+        className="flex-1 px-4 py-4"
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
+        {messages.map((msg) => (
+          <View key={msg.id} className={`mb-4 flex-row ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            
+            {msg.role === 'assistant' && (
+               <View className="bg-indigo-600 w-8 h-8 rounded-full items-center justify-center mr-2 self-start mt-2">
+                 <Bot size={16} color="white" />
+               </View>
+            )}
+            
+            <View className={`max-w-[80%] p-4 rounded-2xl ${
+                msg.role === 'user' 
+                  ? 'bg-zinc-800 dark:bg-zinc-700 rounded-tr-none' 
+                  : 'bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-tl-none'
+              }`}>
+              <Text className={msg.role === 'user' ? 'text-white' : 'text-zinc-800 dark:text-zinc-200'}>
+                {msg.content}
+              </Text>
+
+              {/* Card de Treino Gerado */}
+              {msg.workoutData && (
+                <View className="mt-3 bg-gray-50 dark:bg-zinc-950 rounded-xl p-3 border border-gray-100 dark:border-zinc-800">
+                  <View className="flex-row items-center mb-2 pb-2 border-b border-gray-200 dark:border-zinc-800">
+                    <Dumbbell size={16} color={themeColors.tint} />
+                    <Text className="ml-2 font-bold text-zinc-900 dark:text-zinc-50 flex-1" numberOfLines={1}>
+                      {msg.workoutData.name}
+                    </Text>
+                  </View>
+                  {/* Mostra apenas os 3 primeiros exercícios como preview */}
+                  {msg.workoutData.exercises?.slice(0, 3).map((item: any, idx: number) => (
+                    <Text key={idx} className="text-zinc-500 text-xs mb-1">• {item.exercise.name}</Text>
+                  ))}
+                  <Text className="text-indigo-500 text-[10px] mt-2 font-bold">
+                    Ver treino completo na aba Treinos
+                  </Text>
+                </View>
+              )}
+            </View>
+
+             {msg.role === 'user' && (
+               <View className="bg-gray-200 dark:bg-zinc-800 w-8 h-8 rounded-full items-center justify-center ml-2 self-start mt-2">
+                 <User size={16} color={themeColors.text} />
+               </View>
+            )}
+          </View>
+        ))}
+        
+        {loading && <TypingIndicator />}
+      </ScrollView>
+
+      {/* Área de Input */}
+      <View className="p-4 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800">
+        <View className={`p-1 rounded-2xl border flex-row items-center pr-2 ${
+           input.length >= MAX_CHARS ? 'border-red-300 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950'
+        }`}>
+          <TextInput
+            className="flex-1 px-4 py-3 text-zinc-900 dark:text-zinc-100 max-h-24"
+            placeholder="Ex: Treino de peito intenso..."
+            placeholderTextColor="#a1a1aa"
+            value={input}
+            onChangeText={setInput}
+            multiline
+            maxLength={MAX_CHARS}
+          />
+          <TouchableOpacity 
+            onPress={handleSend}
+            disabled={loading || input.length === 0}
+            className={`p-3 rounded-xl ${input.length > 0 && !loading ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-zinc-800'}`}
+          >
+            <Send size={20} color="white" />
+          </TouchableOpacity>
         </View>
         
-        <View className="flex-1 bg-orange-50 dark:bg-orange-900/10 p-4 rounded-2xl border border-orange-100 dark:border-orange-800">
-           <Dumbbell size={24} color="#f97316" style={{marginBottom: 8}} />
-           <Text className="text-zinc-500 dark:text-zinc-400 text-xs">Total Exercícios</Text>
-           <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-             {workouts.reduce((acc, curr) => acc + (curr._count?.exercises || 0), 0)}
-           </Text>
-        </View>
+        {/* Contador de Caracteres */}
+        <Text className={`text-right text-[10px] mt-1 ${input.length === MAX_CHARS ? 'text-red-500 font-bold' : 'text-zinc-400'}`}>
+          {input.length}/{MAX_CHARS}
+        </Text>
       </View>
-    </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
