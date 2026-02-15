@@ -1,0 +1,78 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password_hash String // Senha já com Salt armazenada aqui
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  goal          String? // Ex: Emagrecimento, Ganho de Massa
+  level         String? // Ex: Iniciante, Intermediário, Avançado
+
+  // Relacionamentos
+  workouts      Workout[]
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+model Exercise {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  muscleGroup String 
+  videoUrl    String // Link do vídeo de execução
+  createdAt   DateTime @default(now())
+
+  workoutExercises WorkoutExercise[]
+
+  @@map("exercises")
+}
+
+model Workout {
+  id            String   @id @default(uuid())
+  userId        String
+  name          String // Treino A, Full Body
+  isAiGenerated Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises     WorkoutExercise[]
+  activityLogs  ActivityLog[]
+
+  @@map("workouts")
+}
+
+model WorkoutExercise {
+  id         String @id @default(uuid())
+  workoutId  String
+  exerciseId String
+  sets       Int? 
+  reps       String? 
+  restTime   Int?
+
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@map("workout_exercises")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  workoutId String
+  completedAt DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workout   Workout @relation(fields: [workoutId], references: [id])
+
+  @@map("activity_logs")
+}
